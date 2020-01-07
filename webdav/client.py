@@ -878,7 +878,7 @@ class Client(object):
 
             response_str = response.getvalue()
             tree = etree.fromstring(response_str)
-            xpath = "{xpath_prefix}{xpath_exp}".format(xpath_prefix=".//", xpath_exp=option['name'])
+            xpath = ".//{%s}%s"%(option.get('namespace', ""),option.get('name', ""))
             return tree.findtext(xpath)
 
         def data(option):
@@ -944,12 +944,16 @@ class Client(object):
             if not self.check(urn.path()):
                 raise RemoteResourceNotFound(urn.path())
 
+            response = BytesIO()
+            
             url = {'hostname': self.webdav.hostname, 'root': self.webdav.root, 'path': urn.quote()}
             options = {
                 'URL': "{hostname}{root}{path}".format(**url),
                 'CUSTOMREQUEST': Client.requests['set_metadata'],
                 'HTTPHEADER': self.get_header('get_metadata'),
-                'POSTFIELDS': data(option)
+                'POSTFIELDS': data(option),
+                'WRITEDATA': response,
+                'NOBODY': 0
             }
 
             request = self.Request(options=options)
