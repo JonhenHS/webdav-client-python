@@ -925,11 +925,10 @@ class Client(object):
 
         def data(option):
 
-            root_node = etree.Element("propertyupdate", xmlns="DAV:")
-            root_node.set('xmlns:u', option.get('namespace', ""))
-            set_node = etree.SubElement(root_node, "set")
-            prop_node = etree.SubElement(set_node, "prop")
-            opt_node = etree.SubElement(prop_node, "{namespace}:{name}".format(namespace='u', name=option['name']))
+            root_node = etree.Element('propertyupdate', xmlns='DAV:', nsmap = {'u' : option.get('namespace', "")})
+            set_node  = etree.SubElement(root_node, 'set')
+            prop_node = etree.SubElement(set_node, 'prop')
+            opt_node  = etree.SubElement(prop_node, "{%s}%s"%(option.get('namespace', ""),option.get('name', "")))
             opt_node.text = option.get('value', "")
 
             tree = etree.ElementTree(root_node)
